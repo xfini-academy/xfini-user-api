@@ -56,7 +56,9 @@ A Docker image is automatically built and pushed to GitHub Container Registry on
 **Pull the latest image:**
 
 ```bash
-docker pull ghcr.io/<github-username>/<repo-name>:main
+IMAGE=ghcr.io/$(git remote get-url origin | sed 's/.*github.com\///' | sed 's/\.git$//')
+
+docker pull $IMAGE:main
 ```
 
 **Run — pass credentials via environment variables:**
@@ -66,7 +68,7 @@ docker run -p 3001:3001 \
   -e ADMIN_EMAIL=you@example.com \
   -e ADMIN_PASSWORD=yourpassword \
   -e FIREBASE_CREDENTIALS='{"type":"service_account",...}' \
-  ghcr.io/<github-username>/<repo-name>:main
+  $IMAGE:main
 ```
 
 > `FIREBASE_CREDENTIALS` must be the entire contents of `serviceAccount.json` as a single-line JSON string. Alternatively, mount the file directly:
@@ -76,7 +78,7 @@ docker run -p 3001:3001 \
 >   -e ADMIN_EMAIL=you@example.com \
 >   -e ADMIN_PASSWORD=yourpassword \
 >   -v $(pwd)/serviceAccount.json:/app/serviceAccount.json \
->   ghcr.io/<github-username>/<repo-name>:main
+>   $IMAGE:main
 > ```
 
 **Available tags:**
