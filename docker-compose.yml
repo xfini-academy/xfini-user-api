@@ -4,6 +4,7 @@ services:
     ports:
       - "5677:3001"
     environment:
+      FIREBASE_API_KEY: ${FIREBASE_API_KEY}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       PORT: ${PORT:-3001}
