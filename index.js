@@ -71,12 +71,12 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // POST /create-student
 app.post('/create-student', async (req, res) => {
-  const { firstName, lastName, planmonths, role, password } = req.body;
+  const { firstName, lastName, planmonths, role } = req.body;
   const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
 
   // Step 1 — Validate input
-  if (!firstName || !lastName || !email || !planmonths || !role || !password) {
-    return res.status(400).json({ success: false, error: 'All fields are required: firstName, lastName, email, planmonths, role, password.', code: 'INVALID_INPUT' });
+  if (!firstName || !lastName || !email || !planmonths || !role) {
+    return res.status(400).json({ success: false, error: 'All fields are required: firstName, lastName, email, planmonths, role.', code: 'INVALID_INPUT' });
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ success: false, error: 'Invalid email address format.', code: 'INVALID_INPUT' });
@@ -84,9 +84,8 @@ app.post('/create-student', async (req, res) => {
   if (!['student', 'admin'].includes(role)) {
     return res.status(400).json({ success: false, error: 'role must be "student" or "admin".', code: 'INVALID_INPUT' });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ success: false, error: 'password must be at least 6 characters.', code: 'INVALID_INPUT' });
-  }
+
+  const password = `${firstName.trim().toLowerCase()}@123`;
   const months = parseInt(planmonths, 10);
   if (isNaN(months) || months <= 0) {
     return res.status(400).json({ success: false, error: 'Invalid planmonths value.', code: 'INVALID_INPUT' });

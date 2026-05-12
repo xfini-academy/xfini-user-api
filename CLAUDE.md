@@ -69,7 +69,7 @@ Signs in using `ADMIN_EMAIL` / `ADMIN_PASSWORD` from env via the Firebase REST A
 | `firstName` | string | Auto-capitalised |
 | `lastName` | string | Auto-capitalised |
 | `email` | string | |
-| `password` | string | Min 6 chars |
+| `password` | — | Auto-generated as `{lowercaseFirstName}@123`; not accepted from caller |
 | `role` | string | `"student"` or `"admin"` |
 | `planmonths` | string | Matched against `name` field in `subscriptionPlans` collection |
 

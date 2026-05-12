@@ -49,6 +49,48 @@ Server starts on `http://localhost:3001` by default.
 | `NGROK_AUTHTOKEN` | Docker only | ngrok auth token |
 | `NGROK_DOMAIN` | Docker only | Static ngrok domain (e.g. `foo.ngrok-free.app`) |
 
+## Docker (standalone)
+
+A Docker image is automatically built and pushed to GitHub Container Registry on every push to `main` or a version tag (`v*`).
+
+**Pull the latest image:**
+
+```bash
+docker pull ghcr.io/<github-username>/<repo-name>:main
+```
+
+**Run — pass credentials via environment variables:**
+
+```bash
+docker run -p 3001:3001 \
+  -e ADMIN_EMAIL=you@example.com \
+  -e ADMIN_PASSWORD=yourpassword \
+  -e FIREBASE_CREDENTIALS='{"type":"service_account",...}' \
+  ghcr.io/<github-username>/<repo-name>:main
+```
+
+> `FIREBASE_CREDENTIALS` must be the entire contents of `serviceAccount.json` as a single-line JSON string. Alternatively, mount the file directly:
+>
+> ```bash
+> docker run -p 3001:3001 \
+>   -e ADMIN_EMAIL=you@example.com \
+>   -e ADMIN_PASSWORD=yourpassword \
+>   -v $(pwd)/serviceAccount.json:/app/serviceAccount.json \
+>   ghcr.io/<github-username>/<repo-name>:main
+> ```
+
+**Available tags:**
+
+| Tag | When pushed |
+| --- | --- |
+| `main` | Every push to `main` branch |
+| `sha-<commit>` | Every push (pinned to exact commit) |
+| `1.2.3` / `1.2` | When a `v1.2.3` git tag is pushed |
+
+The API will be available at `http://localhost:3001`.
+
+---
+
 ## Docker Compose
 
 Starts three services: the API, n8n (HTTPS), and ngrok (public tunnel for n8n).
@@ -110,7 +152,6 @@ Creates a new Firebase Auth user, resolves the subscription plan and active cour
   "firstName": "Jane",
   "lastName": "Doe",
   "email": "jane@example.com",
-  "password": "secret123",
   "role": "student",
   "planmonths": "16 DAYS PLAN"
 }
@@ -121,9 +162,10 @@ Creates a new Firebase Auth user, resolves the subscription plan and active cour
 | `firstName` | string | Auto-capitalised |
 | `lastName` | string | Auto-capitalised |
 | `email` | string | Must be a valid email |
-| `password` | string | Minimum 6 characters |
 | `role` | string | `"student"` or `"admin"` |
 | `planmonths` | string | Matched against `name` field in `subscriptionPlans` Firestore collection |
+
+> Password is auto-generated as `{lowercaseFirstName}@123` (e.g. `jane@123`) and returned in the response.
 
 #### Response
 
@@ -133,7 +175,7 @@ Creates a new Firebase Auth user, resolves the subscription plan and active cour
   "userId": "abc123",
   "email": "jane@example.com",
   "displayName": "Jane Doe",
-  "password": "secret123",
+  "password": "jane@123",
   "role": "student",
   "planName": "16 DAYS PLAN",
   "planId": "plan-doc-id",
