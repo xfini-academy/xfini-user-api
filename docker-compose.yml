@@ -1,6 +1,7 @@
 services:
   xfini-user-api:
     image: ${DOCKER_IMAGE:-ghcr.io/xfini-academy/xfini-user-api:latest}
+    pull_policy: always
     ports:
       - "5677:3001"
     environment:
