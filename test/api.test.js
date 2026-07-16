@@ -87,7 +87,7 @@ mock.module('firebase-admin', {
   exports: {
     default: {
       initializeApp: () => {},
-      credential: { cert: () => ({}) },
+      cert: () => ({}),
       firestore: firestoreFake,
       auth: authFake
     }
