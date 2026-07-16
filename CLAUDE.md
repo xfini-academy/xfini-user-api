@@ -37,6 +37,8 @@ Required `.env` vars for compose:
 | `ADMIN_PASSWORD` | Firebase admin account password |
 | `PORT` | API port (default: 3001) |
 | `FIREBASE_CREDENTIALS` | Full `serviceAccount.json` contents as a single-line JSON string |
+| `FIREBASE_API_KEY` | Firebase Web API key, required by `/api/getToken` |
+| `STATS_DB_PATH` | SQLite file backing `/stats` (default: `./data/stats.db`); persisted via a named volume in Docker |
 | `NGROK_AUTHTOKEN` | ngrok auth token |
 | `NGROK_DOMAIN` | Static ngrok domain (e.g. `foo.ngrok-free.app`) |
 
@@ -56,8 +58,13 @@ The `xfini-user-api` service also mounts `./serviceAccount.json` as a fallback v
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/health` | Health check |
+| GET | `/stats` | Today's and last-7-days' created/failed counts for `/create-student` |
 | POST | `/api/getToken` | Sign in with admin credentials and return a Firebase ID token |
 | POST | `/create-student` | Create a Firebase Auth user + Firestore profile + subscription |
+
+### `GET /stats`
+
+Reads from a local SQLite file (`node:sqlite`, path from `STATS_DB_PATH`, default `./data/stats.db`) that every `/create-student` response is logged to (success/failure + status code + timestamp) via response-finish middleware. Returns `{ today: {created, failed}, last7Days: {created, failed} }`.
 
 ### `POST /api/getToken`
 

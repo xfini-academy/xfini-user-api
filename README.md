@@ -44,19 +44,21 @@ Server starts on `http://localhost:3001` by default.
 | --- | --- | --- |
 | `ADMIN_EMAIL` | Yes | Firebase admin account email |
 | `ADMIN_PASSWORD` | Yes | Firebase admin account password |
+| `FIREBASE_API_KEY` | Yes | Firebase Web API key, used by `/api/getToken` |
 | `PORT` | No | Port to listen on (default: `3001`) |
+| `STATS_DB_PATH` | No | SQLite file backing `/stats` (default: `./data/stats.db`) |
 | `FIREBASE_CREDENTIALS` | Docker only | Full `serviceAccount.json` as a single-line JSON string |
 | `NGROK_AUTHTOKEN` | Docker only | ngrok auth token |
 | `NGROK_DOMAIN` | Docker only | Static ngrok domain (e.g. `foo.ngrok-free.app`) |
 
 ## Docker (standalone)
 
-A Docker image is automatically built and pushed to GitHub Container Registry on every push to `main` or a version tag (`v*`).
+A Docker image is automatically built and pushed to GitHub Container Registry on every push to `main` or a version tag (`v*`). The image path below (`ghcr.io/<owner>/<repo>`) is kept in sync with this repo's own `github.repository` by CI — if you're on a fork, it'll point at your fork's image after your first push to `main`.
 
 **Pull the latest image:**
 
 ```bash
-docker pull ghcr.io/<github-username>/<repo-name>:main
+docker pull ghcr.io/xfini-academy/xfini-user-api:main
 ```
 
 **Run — pass credentials via environment variables:**
@@ -66,7 +68,7 @@ docker run -p 3001:3001 \
   -e ADMIN_EMAIL=you@example.com \
   -e ADMIN_PASSWORD=yourpassword \
   -e FIREBASE_CREDENTIALS='{"type":"service_account",...}' \
-  ghcr.io/<github-username>/<repo-name>:main
+  ghcr.io/xfini-academy/xfini-user-api:main
 ```
 
 > `FIREBASE_CREDENTIALS` must be the entire contents of `serviceAccount.json` as a single-line JSON string. Alternatively, mount the file directly:
@@ -76,7 +78,7 @@ docker run -p 3001:3001 \
 >   -e ADMIN_EMAIL=you@example.com \
 >   -e ADMIN_PASSWORD=yourpassword \
 >   -v $(pwd)/serviceAccount.json:/app/serviceAccount.json \
->   ghcr.io/<github-username>/<repo-name>:main
+>   ghcr.io/xfini-academy/xfini-user-api:main
 > ```
 
 **Available tags:**
@@ -106,6 +108,8 @@ docker compose up --build
 | `ngrok` | `4040` | ngrok dashboard / tunnel for n8n |
 
 > Set `FIREBASE_CREDENTIALS` in `.env` for Docker — the service account is not mounted automatically in production builds.
+>
+> `GET /stats` data (`data/stats.db`) is persisted in the `xfini_stats_data` named volume, so counts survive container restarts.
 
 ---
 
@@ -119,6 +123,22 @@ Health check.
 
 ```json
 { "status": "ok" }
+```
+
+---
+
+### `GET /stats`
+
+Returns `/create-student` created/failed counts for today and the last 7 days, backed by a local SQLite file (`STATS_DB_PATH`, default `./data/stats.db`).
+
+**Response `200`**
+
+```json
+{
+  "success": true,
+  "today": { "created": 3, "failed": 0 },
+  "last7Days": { "created": 21, "failed": 2 }
+}
 ```
 
 ---
