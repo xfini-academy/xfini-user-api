@@ -1,6 +1,6 @@
 {
   "name": "xfini-user-api",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Standalone REST API for Xfini user creation",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
-    "firebase-admin": "^14.1.0"
+    "firebase-admin": "^14.2.0"
   },
   "overrides": {
     "uuid": "^14.0.1"

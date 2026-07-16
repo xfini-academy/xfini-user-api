@@ -35,7 +35,7 @@ const serviceAccount = process.env.FIREBASE_CREDENTIALS
   : require('./serviceAccount.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.cert(serviceAccount)
 });
 
 
