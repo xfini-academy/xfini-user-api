@@ -57,7 +57,6 @@ app.use((req, res, next) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
   const body = req.body && Object.keys(req.body).length ? JSON.stringify(req.body) : null;
-  console.log(`[${timestamp}] ${req.method} ${req.path}${body ? ` — body: ${body}` : ''}`);
 
   res.on('finish', () => {
     const ms = Date.now() - start;
@@ -66,7 +65,7 @@ app.use((req, res, next) => {
     const reset = '\x1b[0m';
     const label = status < 400 ? 'SUCCESS' : 'FAILED';
     console.log(
-      `[${new Date().toISOString()}] ${req.method} ${req.path} → ${color}${status} ${label}${reset} (${ms}ms)`,
+      `[${timestamp}] ${req.method} ${req.path}${body ? ` — body: ${body}` : ''} → ${color}${status} ${label}${reset} (${ms}ms)`,
     );
 
     if (req.path === '/create-student') {
@@ -154,13 +153,11 @@ app.post('/create-student', async (req, res) => {
 
   // Step 1 — Validate input
   if (!firstName || !lastName || !email || !planmonths || !role) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: 'All fields are required: firstName, lastName, email, planmonths, role.',
-        code: 'INVALID_INPUT',
-      });
+    return res.status(400).json({
+      success: false,
+      error: 'All fields are required: firstName, lastName, email, planmonths, role.',
+      code: 'INVALID_INPUT',
+    });
   }
   if (!isValidEmail(email)) {
     return res.status(400).json({ success: false, error: 'Invalid email address format.', code: 'INVALID_INPUT' });
