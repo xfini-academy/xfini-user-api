@@ -40,7 +40,7 @@ services:
 
   ngrok:
     image: ngrok/ngrok:latest
-    command: http --url=${NGROK_DOMAIN} http://n8n:443
+    command: http --url=${NGROK_DOMAIN} --request-header-add "ngrok-skip-browser-warning:true" http://n8n:443
     ports:
       - '4040:4040'
     environment:
