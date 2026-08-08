@@ -1,6 +1,6 @@
 {
   "name": "xfini-user-api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Standalone REST API for Xfini user creation",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.6.0",
+    "express-rate-limit": "^8.6.2",
     "firebase-admin": "^14.2.0"
   },
   "overrides": {
@@ -21,10 +21,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.7.0",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.1.14",
-    "prettier": "^3.9.5"
+    "prettier": "^3.9.6"
   },
   "allowScripts": {
     "@firebase/util@1.15.1": true,
