@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this API
-title: "[Feature] "
+title: '[Feature] '
 labels: enhancement
 ---
 

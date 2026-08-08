@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report a problem with the API
-title: "[Bug] "
+title: '[Bug] '
 labels: bug
 ---
 
@@ -15,5 +15,6 @@ Request made (endpoint, method, body) and the response received.
 What you expected to happen instead.
 
 **Environment**
+
 - Deployment: (local / Docker Compose / other)
 - Node version:
