@@ -208,7 +208,12 @@ app.post('/create-student', async (req, res) => {
   let assignedCourseIds;
   try {
     const coursesSnap = await db.collection('courses').where('isActive', '==', true).get();
-    assignedCourseIds = coursesSnap.docs.filter((d) => !d.data().isTest).map((d) => d.id);
+    assignedCourseIds = coursesSnap.docs
+      .filter((d) => {
+        const course = d.data();
+        return !course.isTest && typeof course.title === 'string' && course.title.includes('[AT]');
+      })
+      .map((d) => d.id);
   } catch (err) {
     return res
       .status(500)

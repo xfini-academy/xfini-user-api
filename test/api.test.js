@@ -38,8 +38,9 @@ const firestoreState = {
 function resetFirestoreState() {
   firestoreState.plans = [makeDoc('plan-6mo', { name: '6', price: 100, isActive: true })];
   firestoreState.courses = [
-    makeDoc('course-1', { isActive: true }),
-    makeDoc('course-2', { isActive: true, isTest: true }),
+    makeDoc('course-1', { isActive: true, title: 'Open Disclosure [AT]' }),
+    makeDoc('course-2', { isActive: true, title: 'Open Disclosure', isTest: true }),
+    makeDoc('course-3', { isActive: true, title: 'General Awareness' }),
   ];
   firestoreState.users = new Map();
   firestoreState.subscriptions = [];
@@ -225,7 +226,7 @@ test('POST /create-student creates a student end-to-end', async () => {
   assert.equal(body.displayName, 'Jane Doe');
   assert.equal(body.password, 'jane@123');
   assert.equal(body.planId, 'plan-6mo');
-  assert.equal(body.assignedCourses, 1); // course-2 is isTest and excluded
+  assert.equal(body.assignedCourses, 1); // only active non-test courses with [AT] in title are included
 
   const storedUser = firestoreState.users.get(body.userId);
   assert.deepEqual(storedUser.assignedCourseIds, ['course-1']);
