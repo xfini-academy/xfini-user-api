@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Standalone REST API for Xfini user creation",
   "main": "index.js",
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@11.26.0",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
