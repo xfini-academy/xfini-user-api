@@ -146,6 +146,215 @@ app.get('/stats', (req, res) => {
   }
 });
 
+function getTomorrowDateStr(timeZone = 'Asia/Kolkata', now = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const todayStr = formatter.format(now);
+  const [y, m, d] = todayStr.split('-').map(Number);
+  const dObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  dObj.setUTCDate(dObj.getUTCDate() + 1);
+  return formatter.format(dObj);
+}
+
+function getDayBoundsInTimezone(dateStr, timeZone = 'Asia/Kolkata') {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const guess = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: false,
+  });
+
+  const parts = dtf.formatToParts(guess);
+  const p = {};
+  for (const part of parts) {
+    p[part.type] = part.value;
+  }
+  const asUTC = Date.UTC(
+    Number(p.year),
+    Number(p.month) - 1,
+    Number(p.day),
+    p.hour === '24' ? 0 : Number(p.hour),
+    Number(p.minute),
+    Number(p.second),
+  );
+  const offset = asUTC - guess.getTime();
+  const startMs = Date.UTC(year, month - 1, day, 0, 0, 0, 0) - offset;
+  const start = new Date(startMs);
+  const end = new Date(startMs + 24 * 60 * 60 * 1000 - 1);
+  return { start, end };
+}
+
+// GET /expiring-students
+app.get('/expiring-students', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (process.env.REQUIRE_AUTH === 'true' && !authHeader) {
+    return res.status(401).json({
+      success: false,
+      code: 'UNAUTHORIZED',
+      error: 'Authorization header is required.',
+    });
+  }
+
+  if (authHeader) {
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    try {
+      await auth.verifyIdToken(token);
+    } catch {
+      return res.status(401).json({
+        success: false,
+        code: 'UNAUTHORIZED',
+        error: 'Invalid or expired authorization token.',
+      });
+    }
+  }
+
+  const timeZone = process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Kolkata';
+
+  let targetDate;
+  if (req.query.date) {
+    if (
+      typeof req.query.date !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(req.query.date) ||
+      isNaN(Date.parse(req.query.date))
+    ) {
+      return res.status(400).json({
+        success: false,
+        code: 'INVALID_INPUT',
+        error: 'Invalid date format. Expected YYYY-MM-DD.',
+      });
+    }
+    targetDate = req.query.date;
+  } else {
+    targetDate = getTomorrowDateStr(timeZone, new Date());
+  }
+
+  try {
+    const bounds = getDayBoundsInTimezone(targetDate, timeZone);
+    const startTimestamp = Timestamp.fromDate(bounds.start);
+    const endTimestamp = Timestamp.fromDate(bounds.end);
+
+    const subsSnapshot = await db
+      .collection('subscriptions')
+      .where('status', '==', 'active')
+      .where('endDate', '>=', startTimestamp)
+      .where('endDate', '<=', endTimestamp)
+      .get();
+
+    if (subsSnapshot.empty) {
+      return res.status(200).json({
+        success: true,
+        targetDate,
+        count: 0,
+        students: [],
+      });
+    }
+
+    // Deduplicate by userId, keeping the most recently updated/created subscription doc
+    const subsByUser = new Map();
+    for (const doc of subsSnapshot.docs) {
+      const data = doc.data();
+      const userId = data.userId;
+      if (!userId) continue;
+
+      const existing = subsByUser.get(userId);
+      if (!existing) {
+        subsByUser.set(userId, { doc, data });
+      } else {
+        const toMillis = (t) => (t && typeof t.toMillis === 'function' ? t.toMillis() : new Date(t || 0).getTime());
+        const existingTime = toMillis(existing.data.updatedAt) || toMillis(existing.data.createdAt) || 0;
+        const currentTime = toMillis(data.updatedAt) || toMillis(data.createdAt) || 0;
+        if (currentTime > existingTime) {
+          subsByUser.set(userId, { doc, data });
+        }
+      }
+    }
+
+    const studentPromises = Array.from(subsByUser.entries()).map(async ([userId, { doc, data }]) => {
+      // Check if user has another active subscription ending AFTER the target date
+      const userSubsSnap = await db.collection('subscriptions').where('userId', '==', userId).get();
+
+      const hasFutureActiveSub = userSubsSnap.docs.some((sDoc) => {
+        if (sDoc.id === doc.id) return false;
+        const sData = sDoc.data();
+        if (sData.status !== 'active' || !sData.endDate) return false;
+        const subEndMs =
+          typeof sData.endDate.toMillis === 'function' ? sData.endDate.toMillis() : new Date(sData.endDate).getTime();
+        return subEndMs > bounds.end.getTime();
+      });
+
+      if (hasFutureActiveSub) {
+        return null;
+      }
+
+      let email = '';
+      let displayName = '';
+      const userDoc = await db.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        const uData = userDoc.data();
+        email = uData.email || '';
+        displayName = uData.displayName || '';
+      }
+
+      // Fallback to Firebase Auth if email is not found in Firestore
+      if (!email) {
+        try {
+          const authUser = await auth.getUser(userId);
+          email = email || authUser.email || '';
+          displayName = displayName || authUser.displayName || '';
+        } catch {
+          // Non-fatal if auth lookup fails
+        }
+      }
+
+      const toIsoString = (val) => {
+        if (!val) return null;
+        if (typeof val.toDate === 'function') return val.toDate().toISOString();
+        return new Date(val).toISOString();
+      };
+
+      return {
+        userId,
+        email,
+        displayName,
+        planId: data.planId || '',
+        planName: data.planName || '',
+        subscriptionId: doc.id,
+        startDate: toIsoString(data.startDate),
+        endDate: toIsoString(data.endDate),
+        status: data.status,
+      };
+    });
+
+    const students = (await Promise.all(studentPromises)).filter(Boolean);
+
+    return res.status(200).json({
+      success: true,
+      targetDate,
+      count: students.length,
+      students,
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Failed to fetch expiring students:', error);
+    }
+    return res.status(500).json({
+      success: false,
+      code: error.code || 'FIRESTORE_FAILED',
+      error: error.message || 'Failed to fetch expiring students.',
+    });
+  }
+});
+
 // POST /create-student
 app.post('/create-student', async (req, res) => {
   const { firstName, lastName, planmonths, role } = req.body;
@@ -317,5 +526,8 @@ const PORT = process.env.PORT || 3001;
 if (require.main === module) {
   app.listen(PORT, () => console.log(`Xfini Academy User API Server Running on http://localhost:${PORT}`));
 }
+
+app.getTomorrowDateStr = getTomorrowDateStr;
+app.getDayBoundsInTimezone = getDayBoundsInTimezone;
 
 module.exports = app;

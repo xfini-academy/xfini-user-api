@@ -73,16 +73,104 @@ The `xfini-user-api`/`user-api` service also mounts `./serviceAccount.json` as a
 
 ## Endpoints
 
-| Method | Path              | Purpose                                                              |
-| ------ | ----------------- | -------------------------------------------------------------------- |
-| GET    | `/health`         | Health check                                                         |
-| GET    | `/stats`          | Today's and last-7-days' created/failed counts for `/create-student` |
-| POST   | `/api/getToken`   | Sign in with admin credentials and return a Firebase ID token        |
-| POST   | `/create-student` | Create a Firebase Auth user + Firestore profile + subscription       |
+| Method | Path                 | Purpose                                                              |
+| ------ | -------------------- | -------------------------------------------------------------------- |
+| GET    | `/health`            | Health check                                                         |
+| GET    | `/stats`             | Today's and last-7-days' created/failed counts for `/create-student` |
+| GET    | `/expiring-students` | List students whose active subscriptions expire tomorrow             |
+| POST   | `/api/getToken`      | Sign in with admin credentials and return a Firebase ID token        |
+| POST   | `/create-student`    | Create a Firebase Auth user + Firestore profile + subscription       |
 
 ### `GET /stats`
 
 Reads from a local SQLite file (`node:sqlite`, path from `STATS_DB_PATH`, default `./data/stats.db`) that every `/create-student` response is logged to (success/failure + status code + timestamp) via response-finish middleware. Returns `{ today: {created, failed}, last7Days: {created, failed} }`.
+
+### `GET /expiring-students`
+
+Returns a list of students whose active subscriptions expire tomorrow (or on a specific date specified via `?date=YYYY-MM-DD`). Designed to be queried by n8n or automated jobs.
+
+#### Query Parameters
+
+| Parameter | Type                  | Required | Description                                                                                  |
+| --------- | --------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `date`    | string (`YYYY-MM-DD`) | No       | Target calendar date. Defaults to tomorrow's date in `APP_TIMEZONE` / `TZ` (`Asia/Kolkata`). |
+
+#### Date & Expiry Calculation
+
+- **Timezone:** Uses `process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Kolkata'`.
+- **Calendar-day Bounds:** Calculates calendar date start (`00:00:00.000`) and end (`23:59:59.999`) in the target timezone (e.g. `2026-09-13T00:00:00.000+05:30` to `2026-09-13T23:59:59.999+05:30`), converting them to Firestore Timestamps in UTC.
+- **Expiry Check:** Evaluates the stored `endDate` Firestore Timestamp on subscription records rather than recalculating from the plan duration, preserving any manual extensions or adjusted end dates.
+
+#### Firestore Collections & Fields Used
+
+1. **`subscriptions`**:
+   - `status == 'active'`
+   - `endDate >= startTimestamp && endDate <= endTimestamp`
+   - Reads: `userId`, `planId`, `planName`, `startDate`, `endDate`, `status`, `createdAt`, `updatedAt`.
+   - **Deduplication:** When multiple matching subscriptions exist for the same student, the latest record (by `updatedAt` / `createdAt`) is kept.
+   - **Renewal Exclusion:** If a student already has another active subscription ending after the target date (`endDate > bounds.end`), they are excluded from the expiring list because their access has already been renewed/extended.
+2. **`users/{userId}`**:
+   - Resolves student `email` and `displayName`.
+   - If missing from Firestore, falls back to Firebase Auth (`auth.getUser(userId)`).
+
+#### Environment Variables
+
+| Variable              | Default        | Purpose                                                                  |
+| --------------------- | -------------- | ------------------------------------------------------------------------ |
+| `APP_TIMEZONE` / `TZ` | `Asia/Kolkata` | Application timezone for calculating tomorrow's calendar boundaries      |
+| `REQUIRE_AUTH`        | `false`        | When `'true'`, enforces a valid `Authorization: Bearer <idToken>` header |
+
+#### Authentication
+
+- Follows existing API security: unauthenticated within trusted internal network / n8n workflows by default.
+- If `REQUIRE_AUTH=true` is set, calls without an `Authorization` header return `401 UNAUTHORIZED`.
+- If an `Authorization: Bearer <idToken>` header is provided, it is verified via Firebase Auth `verifyIdToken()`.
+
+#### Success Response `200`
+
+```json
+{
+  "success": true,
+  "targetDate": "2026-09-13",
+  "count": 1,
+  "students": [
+    {
+      "userId": "firebase-uid",
+      "email": "student@example.com",
+      "displayName": "Student Name",
+      "planId": "k8eTfCxhBaA8fHDd4pT0",
+      "planName": "1 MONTH PLAN",
+      "subscriptionId": "sub-doc-id",
+      "startDate": "2026-08-13T04:07:00.076Z",
+      "endDate": "2026-09-13T04:07:00.076Z",
+      "status": "active"
+    }
+  ]
+}
+```
+
+If no subscriptions expire on the target date, returns `200` with `count: 0` and `students: []`.
+
+#### Error Responses
+
+| Status | Code               | Reason                                         |
+| ------ | ------------------ | ---------------------------------------------- |
+| `400`  | `INVALID_INPUT`    | Invalid `?date` format (expected `YYYY-MM-DD`) |
+| `401`  | `UNAUTHORIZED`     | Missing or invalid Bearer token                |
+| `500`  | `FIRESTORE_FAILED` | Firestore query or resolution failure          |
+
+#### Testing with curl
+
+```bash
+# Check tomorrow's expiries (default)
+curl http://localhost:3001/expiring-students
+
+# Check a specific date
+curl "http://localhost:3001/expiring-students?date=2026-09-14"
+
+# With authorization token (if REQUIRE_AUTH is enabled or testing with auth)
+curl -H "Authorization: Bearer <idToken>" http://localhost:3001/expiring-students
+```
 
 ### `POST /api/getToken`
 
