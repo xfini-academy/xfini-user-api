@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/api/getToken"
+  url: '{{baseUrl}}/api/getToken'
   method: POST
   headers:
     Accept: application/json

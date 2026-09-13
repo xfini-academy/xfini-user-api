@@ -2,7 +2,7 @@ $kind: http-request
 description: Queries active subscriptions ending on an explicit calendar date
   (YYYY-MM-DD). Useful for testing, backfilling, or running scheduled lookaheads
   from n8n.
-url: "{{baseUrl}}/expiring-students?date=2026-09-14"
+url: '{{baseUrl}}/expiring-students?date=2026-09-14'
 method: GET
 headers:
   Accept: application/json
@@ -14,7 +14,7 @@ queryParams:
 auth:
   type: bearer
   credentials:
-    token: "{{idToken}}"
+    token: '{{idToken}}'
 scripts:
   - type: afterResponse
     code: >-

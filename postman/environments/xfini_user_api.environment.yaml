@@ -21,7 +21,7 @@ values:
     value: unsavory-anteater-regally.ngrok-free.dev
     enabled: true
   - key: idToken
-    value: ""
+    value: ''
     enabled: true
     type: secret
   - key: samplePlanMonths

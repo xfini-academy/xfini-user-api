@@ -6,7 +6,7 @@ variables:
     value: http://localhost:3001
     secret: false
   - key: idToken
-    value: ""
+    value: ''
     secret: false
   - key: samplePlanMonths
     value: 16 DAYS PLAN

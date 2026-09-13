@@ -3,14 +3,14 @@ description: Returns all active students whose subscriptions expire tomorrow
   based on Asia/Kolkata calendar boundaries (00:00:00 to 23:59:59).
   Automatically deduplicates by userId and filters out students with future
   active subscriptions.
-url: "{{baseUrl}}/expiring-students"
+url: '{{baseUrl}}/expiring-students'
 method: GET
 headers:
   Accept: application/json
 auth:
   type: bearer
   credentials:
-    token: "{{idToken}}"
+    token: '{{idToken}}'
 scripts:
   - type: afterResponse
     code: |-

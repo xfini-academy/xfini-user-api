@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/stats"
+  url: '{{baseUrl}}/stats'
   method: GET
 response:
   statusCode: 200

@@ -1,7 +1,7 @@
 $kind: http-request
 description: Returns created vs. failed statistics for `/create-student` for
   today and the last 7 days. Backed by local SQLite (`STATS_DB_PATH`).
-url: "{{baseUrl}}/stats"
+url: '{{baseUrl}}/stats'
 method: GET
 headers:
   Accept: application/json

@@ -1,7 +1,7 @@
 $kind: http-request
 description: 'Returns HTTP 200 `{ status: "ok" }`. Used by Docker container
   health checks and uptime monitoring.'
-url: "{{baseUrl}}/health"
+url: '{{baseUrl}}/health'
 method: GET
 headers:
   Accept: application/json

@@ -4,7 +4,7 @@ description: Creates a new student by provisioning a Firebase Auth user,
   courses tagged `[AT]`, auto-resolving the plan from `subscriptionPlans`, and
   creating an active subscription record (`subscriptions/{id}`). Auto-generates
   password as `{lowercaseFirstName}@123`.
-url: "{{baseUrl}}/create-student"
+url: '{{baseUrl}}/create-student'
 method: POST
 headers:
   Content-Type: application/json

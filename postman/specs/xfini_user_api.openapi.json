@@ -28,9 +28,7 @@
         "summary": "Health check",
         "description": "Returns server liveness status. Used by Docker health checks and monitoring.",
         "operationId": "getHealth",
-        "tags": [
-          "Monitoring & Health"
-        ],
+        "tags": ["Monitoring & Health"],
         "responses": {
           "200": {
             "description": "Server is healthy",
@@ -50,9 +48,7 @@
         "summary": "API statistics",
         "description": "Returns created vs. failed student creation counts for today and the last 7 days from local SQLite.",
         "operationId": "getStats",
-        "tags": [
-          "Monitoring & Health"
-        ],
+        "tags": ["Monitoring & Health"],
         "responses": {
           "200": {
             "description": "Usage statistics",
@@ -82,9 +78,7 @@
         "summary": "Get admin Firebase ID token",
         "description": "Signs in with ADMIN_EMAIL and ADMIN_PASSWORD configured in the server environment via Firebase Identity Toolkit and returns a fresh short-lived ID token (1 hour).",
         "operationId": "getToken",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "responses": {
           "200": {
             "description": "Token generated successfully",
@@ -124,9 +118,7 @@
         "summary": "Create student user and subscription",
         "description": "Creates a Firebase Auth user, resolves subscription plan, queries active courses tagged [AT], creates Firestore student profile (users/{uid}) and active subscription record (subscriptions/{id}), and sets custom user claims.",
         "operationId": "createStudent",
-        "tags": [
-          "Students & Subscriptions"
-        ],
+        "tags": ["Students & Subscriptions"],
         "requestBody": {
           "required": true,
           "content": {
@@ -176,9 +168,7 @@
         "summary": "List subscriptions expiring tomorrow (or on target date)",
         "description": "Reads active subscriptions ending on tomorrow's calendar date in Asia/Kolkata (or target date from query). Deduplicates by student userId and excludes students who have an active subscription extended beyond the target date.",
         "operationId": "getExpiringStudents",
-        "tags": [
-          "Students & Subscriptions"
-        ],
+        "tags": ["Students & Subscriptions"],
         "security": [
           {
             "BearerAuth": []
@@ -261,9 +251,7 @@
             "example": "ok"
           }
         },
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       },
       "StatsResponse": {
         "type": "object",
@@ -284,10 +272,7 @@
                 "example": 1
               }
             },
-            "required": [
-              "created",
-              "failed"
-            ]
+            "required": ["created", "failed"]
           },
           "last7Days": {
             "type": "object",
@@ -301,17 +286,10 @@
                 "example": 3
               }
             },
-            "required": [
-              "created",
-              "failed"
-            ]
+            "required": ["created", "failed"]
           }
         },
-        "required": [
-          "success",
-          "today",
-          "last7Days"
-        ]
+        "required": ["success", "today", "last7Days"]
       },
       "GetTokenResponse": {
         "type": "object",
@@ -329,11 +307,7 @@
             "example": "3600"
           }
         },
-        "required": [
-          "success",
-          "idToken",
-          "expiresIn"
-        ]
+        "required": ["success", "idToken", "expiresIn"]
       },
       "CreateStudentRequest": {
         "type": "object",
@@ -353,10 +327,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "student",
-              "admin"
-            ],
+            "enum": ["student", "admin"],
             "example": "student"
           },
           "planmonths": {
@@ -365,13 +336,7 @@
             "example": "16 DAYS PLAN"
           }
         },
-        "required": [
-          "firstName",
-          "lastName",
-          "email",
-          "role",
-          "planmonths"
-        ]
+        "required": ["firstName", "lastName", "email", "role", "planmonths"]
       },
       "CreateStudentResponse": {
         "type": "object",
@@ -458,12 +423,7 @@
             }
           }
         },
-        "required": [
-          "success",
-          "targetDate",
-          "count",
-          "students"
-        ]
+        "required": ["success", "targetDate", "count", "students"]
       },
       "StudentExpiringItem": {
         "type": "object",
@@ -535,10 +495,7 @@
             "example": "All fields are required."
           }
         },
-        "required": [
-          "success",
-          "error"
-        ]
+        "required": ["success", "error"]
       }
     }
   }

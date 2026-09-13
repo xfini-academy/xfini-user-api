@@ -3,7 +3,7 @@ description: Signs in using ADMIN_EMAIL and ADMIN_PASSWORD configured in the
   server environment via the Google Identity Toolkit REST API and returns a
   short-lived Firebase ID token (valid for 1 hour). Automatically sets the
   `idToken` collection variable upon success.
-url: "{{baseUrl}}/api/getToken"
+url: '{{baseUrl}}/api/getToken'
 method: POST
 headers:
   Accept: application/json

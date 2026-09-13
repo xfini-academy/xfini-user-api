@@ -1,6 +1,6 @@
 $kind: http-example
 request:
-  url: "{{baseUrl}}/expiring-students?date=2026-09-14"
+  url: '{{baseUrl}}/expiring-students?date=2026-09-14'
   method: GET
   queryParams:
     date: 2026-09-14

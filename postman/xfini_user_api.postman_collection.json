@@ -86,13 +86,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/getToken",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "getToken"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "getToken"]
             },
             "description": "Signs in using ADMIN_EMAIL and ADMIN_PASSWORD configured in the server environment via the Google Identity Toolkit REST API and returns a short-lived Firebase ID token (valid for 1 hour). Automatically sets the `idToken` collection variable upon success."
           },
@@ -109,13 +104,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/getToken",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "getToken"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "getToken"]
                 }
               },
               "status": "OK",
@@ -141,13 +131,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/getToken",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "getToken"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "getToken"]
                 }
               },
               "status": "Unauthorized",
@@ -173,13 +158,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/getToken",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "api",
-                    "getToken"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "getToken"]
                 }
               },
               "status": "Internal Server Error",
@@ -241,15 +221,8 @@
             "url": {
               "raw": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebaseApiKey}}",
               "protocol": "https",
-              "host": [
-                "identitytoolkit",
-                "googleapis",
-                "com"
-              ],
-              "path": [
-                "v1",
-                "accounts:signInWithPassword"
-              ],
+              "host": ["identitytoolkit", "googleapis", "com"],
+              "path": ["v1", "accounts:signInWithPassword"],
               "query": [
                 {
                   "key": "key",
@@ -314,12 +287,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/create-student",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "create-student"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["create-student"]
             },
             "description": "Creates a new student by provisioning a Firebase Auth user, creating their Firestore student profile (`users/{uid}`), querying active courses tagged `[AT]`, auto-resolving the plan from `subscriptionPlans`, and creating an active subscription record (`subscriptions/{id}`). Auto-generates password as `{lowercaseFirstName}@123`."
           },
@@ -340,12 +309,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/create-student",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "create-student"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["create-student"]
                 }
               },
               "status": "OK",
@@ -375,12 +340,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/create-student",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "create-student"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["create-student"]
                 }
               },
               "status": "Bad Request",
@@ -410,12 +371,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/create-student",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "create-student"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["create-student"]
                 }
               },
               "status": "Bad Request",
@@ -445,12 +402,8 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/create-student",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "create-student"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["create-student"]
                 }
               },
               "status": "Bad Request",
@@ -510,12 +463,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/expiring-students",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "expiring-students"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["expiring-students"]
             },
             "description": "Returns all active students whose subscriptions expire tomorrow based on Asia/Kolkata calendar boundaries (00:00:00 to 23:59:59). Automatically deduplicates by userId and filters out students with future active subscriptions."
           },
@@ -532,12 +481,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/expiring-students",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "expiring-students"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["expiring-students"]
                 }
               },
               "status": "OK",
@@ -563,12 +508,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/expiring-students",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "expiring-students"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["expiring-students"]
                 }
               },
               "status": "OK",
@@ -594,12 +535,8 @@
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/expiring-students",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "expiring-students"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["expiring-students"]
                 }
               },
               "status": "Unauthorized",
@@ -656,12 +593,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/expiring-students?date=2026-09-14",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "expiring-students"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["expiring-students"],
               "query": [
                 {
                   "key": "date",
@@ -679,12 +612,8 @@
                 "method": "GET",
                 "url": {
                   "raw": "{{baseUrl}}/expiring-students?date=2026-09-14",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "expiring-students"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["expiring-students"],
                   "query": [
                     {
                       "key": "date",
@@ -710,12 +639,8 @@
                 "method": "GET",
                 "url": {
                   "raw": "{{baseUrl}}/expiring-students?date=invalid-date",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "expiring-students"
-                  ],
+                  "host": ["{{baseUrl}}"],
+                  "path": ["expiring-students"],
                   "query": [
                     {
                       "key": "date",
@@ -773,12 +698,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/health",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "health"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
             },
             "description": "Returns HTTP 200 `{ status: \"ok\" }`. Used by Docker container health checks and uptime monitoring."
           },
@@ -789,12 +710,8 @@
                 "method": "GET",
                 "url": {
                   "raw": "{{baseUrl}}/health",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "health"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health"]
                 }
               },
               "status": "OK",
@@ -844,12 +761,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/stats",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "stats"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["stats"]
             },
             "description": "Returns created vs. failed statistics for `/create-student` for today and the last 7 days. Backed by local SQLite (`STATS_DB_PATH`)."
           },
@@ -860,12 +773,8 @@
                 "method": "GET",
                 "url": {
                   "raw": "{{baseUrl}}/stats",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "stats"
-                  ]
+                  "host": ["{{baseUrl}}"],
+                  "path": ["stats"]
                 }
               },
               "status": "OK",
@@ -916,12 +825,8 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": [""]
             },
             "description": "Ready-to-use template for testing new endpoints with pre-configured Authorization header."
           },
