@@ -2,10 +2,9 @@
  * Mock server for Xfini User API
  * Port: 4010 (default) or process.env.MOCK_PORT
  */
-try {
-  require('dotenv').config();
-} catch (e) {}
+require('dotenv').config();
 const http = require('http');
+const { URL } = require('url');
 
 const PORT = process.env.MOCK_PORT || 4010;
 

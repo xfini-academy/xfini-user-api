@@ -1,6 +1,6 @@
 $kind: http-request
-description: Ready-to-use template for testing new or custom endpoints. Automatically includes `Authorization: Bearer {{idToken}}` and `Content-Type: application/json`.
-url: "{{baseUrl}}/"
+description: 'Ready-to-use template for testing new or custom endpoints. Automatically includes Authorization: Bearer {{idToken}} and Content-Type: application/json.'
+url: '{{baseUrl}}/'
 method: GET
 headers:
   Accept: application/json
