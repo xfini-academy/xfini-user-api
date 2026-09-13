@@ -384,38 +384,97 @@ app.get('/expiring-students', async (req, res) => {
   }
 });
 
+function makeStudentResponse(overrides = {}) {
+  return {
+    success: false,
+    userId: null,
+    email: null,
+    displayName: null,
+    password: null,
+    role: null,
+    planName: null,
+
+    planId: null,
+    subscriptionId: null,
+    assignedCourses: 0,
+    endDate: null,
+    code: null,
+    error: null,
+    ...overrides,
+  };
+}
+
 // POST /create-student
 app.post('/create-student', async (req, res) => {
   const { firstName, lastName, planmonths, role } = req.body;
   const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
 
+  const toProper = (str) =>
+    typeof str === 'string'
+      ? str
+          .trim()
+          .toLowerCase()
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      : '';
+
+  const displayName = firstName && lastName ? `${toProper(firstName)} ${toProper(lastName)}` : null;
+  const password = typeof firstName === 'string' && firstName.trim() ? `${firstName.trim().toLowerCase()}@123` : null;
+
   // Step 1 — Validate input
   if (!firstName || !lastName || !email || !planmonths || !role) {
-    return res.status(400).json({
-      success: false,
-      error: 'All fields are required: firstName, lastName, email, planmonths, role.',
-      code: 'INVALID_INPUT',
-    });
+    return res.status(400).json(
+      makeStudentResponse({
+        success: false,
+        error: 'All fields are required: firstName, lastName, email, planmonths, role.',
+        code: 'INVALID_INPUT',
+        email: email || null,
+        displayName,
+        password,
+        role: role || null,
+      }),
+    );
   }
   if (!isValidEmail(email)) {
-    return res.status(400).json({ success: false, error: 'Invalid email address format.', code: 'INVALID_INPUT' });
+    return res.status(400).json(
+      makeStudentResponse({
+        success: false,
+        error: 'Invalid email address format.',
+        code: 'INVALID_INPUT',
+        email,
+        displayName,
+        password,
+        role,
+      }),
+    );
   }
   if (!['student', 'admin'].includes(role)) {
-    return res.status(400).json({ success: false, error: 'role must be "student" or "admin".', code: 'INVALID_INPUT' });
+    return res.status(400).json(
+      makeStudentResponse({
+        success: false,
+        error: 'role must be "student" or "admin".',
+        code: 'INVALID_INPUT',
+        email,
+        displayName,
+        password,
+        role,
+      }),
+    );
   }
 
-  const password = `${firstName.trim().toLowerCase()}@123`;
   const months = parseInt(planmonths, 10);
   if (isNaN(months) || months <= 0) {
-    return res.status(400).json({ success: false, error: 'Invalid planmonths value.', code: 'INVALID_INPUT' });
+    return res.status(400).json(
+      makeStudentResponse({
+        success: false,
+        error: 'Invalid planmonths value.',
+        code: 'INVALID_INPUT',
+        email,
+        displayName,
+        password,
+        role,
+      }),
+    );
   }
-
-  const toProper = (str) =>
-    str
-      .trim()
-      .toLowerCase()
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-  const displayName = `${toProper(firstName)} ${toProper(lastName)}`;
 
   // Step 2 — Resolve subscription plan from Firestore
   let planId, planName, price;
@@ -428,18 +487,34 @@ app.post('/create-student', async (req, res) => {
       .get();
 
     if (plansSnap.empty) {
-      return res
-        .status(400)
-        .json({ success: false, error: `No active plan found with name "${planmonths}".`, code: 'PLAN_NOT_FOUND' });
+      return res.status(400).json(
+        makeStudentResponse({
+          success: false,
+          error: `No active plan found with name "${planmonths}".`,
+          code: 'PLAN_NOT_FOUND',
+          email,
+          displayName,
+          password,
+          role,
+        }),
+      );
     }
 
     const planDoc = plansSnap.docs[0];
     planId = planDoc.id;
     ({ name: planName, price } = planDoc.data());
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, error: `Failed to fetch plan: ${err.message}`, code: 'FIRESTORE_FAILED' });
+    return res.status(500).json(
+      makeStudentResponse({
+        success: false,
+        error: `Failed to fetch plan: ${err.message}`,
+        code: 'FIRESTORE_FAILED',
+        email,
+        displayName,
+        password,
+        role,
+      }),
+    );
   }
 
   // Step 3 — Get active course IDs
@@ -456,9 +531,19 @@ app.post('/create-student', async (req, res) => {
       `[${new Date().toISOString()}] Courses for ${displayName} (${email}): ${coursesSnap.size} active, ${assignedCourseIds.length} matched "[AT]" and assigned`,
     );
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, error: `Failed to fetch courses: ${err.message}`, code: 'FIRESTORE_FAILED' });
+    return res.status(500).json(
+      makeStudentResponse({
+        success: false,
+        error: `Failed to fetch courses: ${err.message}`,
+        code: 'FIRESTORE_FAILED',
+        email,
+        displayName,
+        password,
+        role,
+        planName,
+        planId,
+      }),
+    );
   }
 
   // Steps 4–8 — Auth + Firestore writes (cleanup on failure)
@@ -521,19 +606,21 @@ app.post('/create-student', async (req, res) => {
       console.warn('Custom claims failed (non-fatal):', e.message);
     }
 
-    return res.status(200).json({
-      success: true,
-      userId: uid,
-      email,
-      displayName,
-      password,
-      role,
-      planName,
-      planId,
-      subscriptionId: subscriptionRef.id,
-      assignedCourses: assignedCourseIds.length,
-      endDate: endDate.toISOString(),
-    });
+    return res.status(200).json(
+      makeStudentResponse({
+        success: true,
+        userId: uid,
+        email,
+        displayName,
+        password,
+        role,
+        planName,
+        planId,
+        subscriptionId: subscriptionRef.id,
+        assignedCourses: assignedCourseIds.length,
+        endDate: endDate.toISOString(),
+      }),
+    );
   } catch (error) {
     if (uid) {
       try {
@@ -543,11 +630,20 @@ app.post('/create-student', async (req, res) => {
       }
     }
     console.error(error);
-    return res.status(400).json({
-      success: false,
-      code: error.code || 'AUTH_FAILED',
-      error: error.message || 'Unknown error',
-    });
+    return res.status(400).json(
+      makeStudentResponse({
+        success: false,
+        code: error.code || 'AUTH_FAILED',
+        error: error.message || 'Unknown error',
+        email,
+        displayName,
+        password,
+        role,
+        planName: planName || null,
+        planId: planId || null,
+        assignedCourses: assignedCourseIds ? assignedCourseIds.length : 0,
+      }),
+    );
   }
 });
 
