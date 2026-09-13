@@ -1,0 +1,34 @@
+$kind: http-request
+description: Directly calls Google Identity Toolkit REST API using `firebaseApiKey`, `adminEmail`, and `adminPassword` to obtain a fresh Firebase ID token. Automatically saves `idToken` to environment and collection variables.
+url: https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebaseApiKey}}
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  mode: raw
+  raw: |-
+    {
+      "email": "{{adminEmail}}",
+      "password": "{{adminPassword}}",
+      "returnSecureToken": true
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Token returned and saved", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.idToken).to.be.a("string");
+          pm.expect(jsonData.expiresIn).to.exist;
+
+          // Save token for subsequent API calls
+          pm.collectionVariables.set("idToken", jsonData.idToken);
+          if (pm.environment) {
+              pm.environment.set("idToken", jsonData.idToken);
+          }
+      });
+    language: text/javascript
+order: 2000

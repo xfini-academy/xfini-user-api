@@ -1,0 +1,933 @@
+{
+  "info": {
+    "_postman_id": "8061de94-8761-4dec-b2f1-e790fd78717e",
+    "name": "Xfini User API",
+    "description": "Complete Postman API Collection for Xfini User API. A standalone Express REST API for student user creation, subscription management, and expiry tracking, backed by Firebase Auth and Cloud Firestore.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string",
+      "description": "Base URL for the Xfini User API server (default: http://localhost:3001, or Docker port 5677)"
+    },
+    {
+      "key": "idToken",
+      "value": "",
+      "type": "string",
+      "description": "Firebase ID token returned from POST /api/getToken. Automatically populated by the getToken test script."
+    },
+    {
+      "key": "samplePlanMonths",
+      "value": "16 DAYS PLAN",
+      "type": "string",
+      "description": "Sample active plan name in Firestore subscriptionPlans collection"
+    },
+    {
+      "key": "firebaseApiKey",
+      "value": "yAIzaSyCxGroehAVetfOyNexCJglaY06ishxcrSE",
+      "type": "string",
+      "description": "Firebase Web API key"
+    },
+    {
+      "key": "adminEmail",
+      "value": "rahulbushi69@gmail.com",
+      "type": "string",
+      "description": "Admin email account"
+    },
+    {
+      "key": "adminPassword",
+      "value": "rahul@123",
+      "type": "string",
+      "description": "Admin account password"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for obtaining Firebase authentication tokens for administrative and authorized operations.",
+      "item": [
+        {
+          "name": "Get Admin ID Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response indicates success\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.idToken).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.expiresIn).to.exist;",
+                  "    ",
+                  "    // Store token in collection & environment variable for subsequent requests",
+                  "    pm.collectionVariables.set(\"idToken\", jsonData.idToken);",
+                  "    if (pm.environment) {",
+                  "        pm.environment.set(\"idToken\", jsonData.idToken);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/getToken",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "getToken"
+              ]
+            },
+            "description": "Signs in using ADMIN_EMAIL and ADMIN_PASSWORD configured in the server environment via the Google Identity Toolkit REST API and returns a short-lived Firebase ID token (valid for 1 hour). Automatically sets the `idToken` collection variable upon success."
+          },
+          "response": [
+            {
+              "name": "200 Success - Token Generated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/getToken",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "getToken"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"idToken\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjEyMzQ1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vY291cnNlLWMxOGJiIiwiYXVkaWVuY2UiOiJjb3Vyc2UtYzE4YmIiLCJhdXRoX3RpbWUiOjE3MjYxNDM2MDAsInVzZXJfaWQiOiJhZG1pbi11aWQiLCJzdWIiOiJhZG1pbi11aWQiLCJpYXQiOjE3MjYxNDM2MDAsImV4cCI6MTcyNjE0NzIwMCwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicm9sZSI6ImFkbWluIn0.signature\",\n  \"expiresIn\": \"3600\"\n}"
+            },
+            {
+              "name": "401 Unauthorized - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/getToken",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "getToken"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": \"INVALID_LOGIN_CREDENTIALS\"\n}"
+            },
+            {
+              "name": "500 Server Error - Missing Configuration",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/getToken",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "getToken"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": \"ADMIN_EMAIL or ADMIN_PASSWORD not set in .env\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Direct Firebase Auth Sign-In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Token returned and saved\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.idToken).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.expiresIn).to.exist;",
+                  "    ",
+                  "    pm.collectionVariables.set(\"idToken\", jsonData.idToken);",
+                  "    if (pm.environment) {",
+                  "        pm.environment.set(\"idToken\", jsonData.idToken);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"returnSecureToken\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebaseApiKey}}",
+              "protocol": "https",
+              "host": [
+                "identitytoolkit",
+                "googleapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "accounts:signInWithPassword"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{firebaseApiKey}}"
+                }
+              ]
+            },
+            "description": "Direct call to Google Identity Toolkit REST API to acquire a Firebase ID token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students & Subscriptions",
+      "description": "Endpoints for creating students, managing course assignments, and tracking subscription expiries.",
+      "item": [
+        {
+          "name": "Create Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect([200, 400]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Student created successfully\", function () {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData.success).to.be.true;",
+                  "        pm.expect(jsonData.userId).to.be.a(\"string\");",
+                  "        pm.expect(jsonData.email).to.be.a(\"string\");",
+                  "        pm.expect(jsonData.subscriptionId).to.be.a(\"string\");",
+                  "        pm.expect(jsonData.endDate).to.be.a(\"string\");",
+                  "        ",
+                  "        pm.collectionVariables.set(\"lastCreatedUserId\", jsonData.userId);",
+                  "        pm.collectionVariables.set(\"lastSubscriptionId\", jsonData.subscriptionId);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"role\": \"student\",\n  \"planmonths\": \"{{samplePlanMonths}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/create-student",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "create-student"
+              ]
+            },
+            "description": "Creates a new student by provisioning a Firebase Auth user, creating their Firestore student profile (`users/{uid}`), querying active courses tagged `[AT]`, auto-resolving the plan from `subscriptionPlans`, and creating an active subscription record (`subscriptions/{id}`). Auto-generates password as `{lowercaseFirstName}@123`."
+          },
+          "response": [
+            {
+              "name": "200 Success - Student Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"role\": \"student\",\n  \"planmonths\": \"16 DAYS PLAN\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/create-student",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "create-student"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"userId\": \"7dKpQzKfadX5CaY8lNzQW61Tu49\",\n  \"email\": \"jane.doe@example.com\",\n  \"displayName\": \"Jane Doe\",\n  \"password\": \"jane@123\",\n  \"role\": \"student\",\n  \"planName\": \"16 DAYS PLAN\",\n  \"planId\": \"5TSO8OTZY7zXUbNztCFU\",\n  \"subscriptionId\": \"sub_7dKpQzKfadX5CaY8lN\",\n  \"assignedCourses\": 4,\n  \"endDate\": \"2026-09-28T10:00:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Missing Fields",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/create-student",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "create-student"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": \"All fields are required: firstName, lastName, email, planmonths, role.\",\n  \"code\": \"INVALID_INPUT\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Plan Not Found",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"role\": \"student\",\n  \"planmonths\": \"NON_EXISTENT_PLAN\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/create-student",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "create-student"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"error\": \"No active plan found with name \\\"NON_EXISTENT_PLAN\\\".\",\n  \"code\": \"PLAN_NOT_FOUND\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Email Already In Use",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"existing.student@example.com\",\n  \"role\": \"student\",\n  \"planmonths\": \"16 DAYS PLAN\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/create-student",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "create-student"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"code\": \"auth/email-already-exists\",\n  \"error\": \"The email address is already in use by another account.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Expiring Students (Tomorrow)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has expected schema\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.targetDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);",
+                  "    pm.expect(jsonData.count).to.be.a(\"number\");",
+                  "    pm.expect(jsonData.students).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.count).to.equal(jsonData.students.length);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{idToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expiring-students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expiring-students"
+              ]
+            },
+            "description": "Returns all active students whose subscriptions expire tomorrow based on Asia/Kolkata calendar boundaries (00:00:00 to 23:59:59). Automatically deduplicates by userId and filters out students with future active subscriptions."
+          },
+          "response": [
+            {
+              "name": "200 Success - Students Expiring Tomorrow",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/expiring-students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expiring-students"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"targetDate\": \"2026-09-13\",\n  \"count\": 1,\n  \"students\": [\n    {\n      \"userId\": \"B3UZ4qzr81SXjjqbx6wLJNGOKZ12\",\n      \"email\": \"student@example.com\",\n      \"displayName\": \"John Doe\",\n      \"planId\": \"k8eTfCxhBaA8fHDd4pT0\",\n      \"planName\": \"1 MONTH PLAN\",\n      \"subscriptionId\": \"03TnaVAlnmUShrA5bc7M\",\n      \"startDate\": \"2026-08-13T04:07:00.076Z\",\n      \"endDate\": \"2026-09-13T04:07:00.076Z\",\n      \"status\": \"active\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "200 Success - No Expiries Tomorrow",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/expiring-students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expiring-students"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"targetDate\": \"2026-09-13\",\n  \"count\": 0,\n  \"students\": []\n}"
+            },
+            {
+              "name": "401 Unauthorized - Invalid Token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer invalid_token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/expiring-students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expiring-students"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"code\": \"UNAUTHORIZED\",\n  \"error\": \"Invalid or expired authorization token.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Expiring Students (By Date)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Target date matches query parameter\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.targetDate).to.equal(pm.request.url.query.get(\"date\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{idToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/expiring-students?date=2026-09-14",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expiring-students"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-09-14",
+                  "description": "Target calendar date in YYYY-MM-DD format (evaluated in Asia/Kolkata timezone boundaries)"
+                }
+              ]
+            },
+            "description": "Queries active subscriptions ending on an explicit calendar date (YYYY-MM-DD). Useful for testing, backfilling, or running scheduled lookaheads from n8n."
+          },
+          "response": [
+            {
+              "name": "200 Success - Matching Students for Date",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/expiring-students?date=2026-09-14",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expiring-students"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-09-14"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"targetDate\": \"2026-09-14\",\n  \"count\": 4,\n  \"students\": [\n    {\n      \"userId\": \"YfJUNe0yhjMRVg232tVoDejh7Pq2\",\n      \"email\": \"student1@example.com\",\n      \"displayName\": \"Christy Diana\",\n      \"planId\": \"JaSv4BFhylB9w7I5k5Bf\",\n      \"planName\": \"2 MONTH PLAN\",\n      \"subscriptionId\": \"OrLK07Awf6R4cUs9Acgy\",\n      \"startDate\": \"2026-06-15T04:18:07.847Z\",\n      \"endDate\": \"2026-09-14T04:18:07.847Z\",\n      \"status\": \"active\"\n    },\n    {\n      \"userId\": \"1RN0ke5rMDf4oGUVh0hwnFSjkn02\",\n      \"email\": \"student2@example.com\",\n      \"displayName\": \"Sachini Chanika\",\n      \"planId\": \"JaSv4BFhylB9w7I5k5Bf\",\n      \"planName\": \"2 MONTH PLAN\",\n      \"subscriptionId\": \"OJNMx9kbM9pFI3InuxSe\",\n      \"startDate\": \"2026-06-15T08:56:44.972Z\",\n      \"endDate\": \"2026-09-14T08:56:44.972Z\",\n      \"status\": \"active\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "400 Bad Request - Invalid Date Format",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/expiring-students?date=invalid-date",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "expiring-students"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "invalid-date"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"code\": \"INVALID_INPUT\",\n  \"error\": \"Invalid date format. Expected YYYY-MM-DD.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Monitoring & Health",
+      "description": "System health check and request statistics endpoints.",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Status is ok\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal(\"ok\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Returns HTTP 200 `{ status: \"ok\" }`. Used by Docker container health checks and uptime monitoring."
+          },
+          "response": [
+            {
+              "name": "200 Success",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status\": \"ok\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "API Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains today and last7Days counts\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.today).to.have.property(\"created\");",
+                  "    pm.expect(jsonData.today).to.have.property(\"failed\");",
+                  "    pm.expect(jsonData.last7Days).to.have.property(\"created\");",
+                  "    pm.expect(jsonData.last7Days).to.have.property(\"failed\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats"
+              ]
+            },
+            "description": "Returns created vs. failed statistics for `/create-student` for today and the last 7 days. Backed by local SQLite (`STATS_DB_PATH`)."
+          },
+          "response": [
+            {
+              "name": "200 Success",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "stats"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"today\": {\n    \"created\": 5,\n    \"failed\": 1\n  },\n  \"last7Days\": {\n    \"created\": 34,\n    \"failed\": 3\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Templates & Playground",
+      "description": "Pre-configured templates for testing new or custom endpoints.",
+      "item": [
+        {
+          "name": "Custom Request Template",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is success (2xx)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{idToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Ready-to-use template for testing new endpoints with pre-configured Authorization header."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

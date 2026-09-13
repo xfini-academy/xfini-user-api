@@ -1,0 +1,3 @@
+$kind: collection
+description: Endpoints for creating students, managing course assignments, and tracking subscription expiries.
+order: 2000

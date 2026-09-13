@@ -1,0 +1,56 @@
+{
+  "id": "e6741706-e7e2-45e0-811c-2dfdbfce45c7",
+  "name": "Xfini User API (Local Environment)",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "ngrokBaseUrl",
+      "value": "https://unsavory-anteater-regally.ngrok-free.dev",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminEmail",
+      "value": "rahulbushi69@gmail.com",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminPassword",
+      "value": "rahul@123",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "firebaseApiKey",
+      "value": "yAIzaSyCxGroehAVetfOyNexCJglaY06ishxcrSE",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "ngrokDomain",
+      "value": "unsavory-anteater-regally.ngrok-free.dev",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "idToken",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "samplePlanMonths",
+      "value": "16 DAYS PLAN",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Postman/11.0.0"
+}

@@ -1,0 +1,33 @@
+$kind: http-request
+description: Queries active subscriptions ending on an explicit calendar date
+  (YYYY-MM-DD). Useful for testing, backfilling, or running scheduled lookaheads
+  from n8n.
+url: "{{baseUrl}}/expiring-students?date=2026-09-14"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: date
+    value: 2026-09-14
+    description: Target calendar date in YYYY-MM-DD format (evaluated in
+      Asia/Kolkata timezone boundaries)
+auth:
+  type: bearer
+  credentials:
+    token: "{{idToken}}"
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+
+      pm.test("Target date matches query parameter", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.success).to.be.true;
+          pm.expect(jsonData.targetDate).to.equal(pm.request.url.query.get("date"));
+      });
+    language: text/javascript
+examples: ./.resources/Get Expiring Students (By Date).resources/examples
+order: 3000

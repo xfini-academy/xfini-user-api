@@ -1,0 +1,31 @@
+$kind: http-request
+description: Returns all active students whose subscriptions expire tomorrow
+  based on Asia/Kolkata calendar boundaries (00:00:00 to 23:59:59).
+  Automatically deduplicates by userId and filters out students with future
+  active subscriptions.
+url: "{{baseUrl}}/expiring-students"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{idToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response has expected schema", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.success).to.be.true;
+          pm.expect(jsonData.targetDate).to.match(/^\d{4}-\d{2}-\d{2}$/);
+          pm.expect(jsonData.count).to.be.a("number");
+          pm.expect(jsonData.students).to.be.an("array");
+          pm.expect(jsonData.count).to.equal(jsonData.students.length);
+      });
+    language: text/javascript
+examples: ./.resources/Get Expiring Students (Tomorrow).resources/examples
+order: 2000

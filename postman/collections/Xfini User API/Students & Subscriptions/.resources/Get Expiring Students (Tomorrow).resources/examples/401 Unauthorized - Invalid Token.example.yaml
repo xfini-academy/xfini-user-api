@@ -1,0 +1,20 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/expiring-students"
+  method: GET
+  headers:
+    Authorization: Bearer invalid_token
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "code": "UNAUTHORIZED",
+        "error": "Invalid or expired authorization token."
+      }
+order: 3000

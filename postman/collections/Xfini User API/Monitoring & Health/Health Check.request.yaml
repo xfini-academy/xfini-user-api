@@ -1,0 +1,21 @@
+$kind: http-request
+description: 'Returns HTTP 200 `{ status: "ok" }`. Used by Docker container
+  health checks and uptime monitoring.'
+url: "{{baseUrl}}/health"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Status is ok", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.status).to.equal("ok");
+      });
+    language: text/javascript
+examples: ./.resources/Health Check.resources/examples
+order: 1000

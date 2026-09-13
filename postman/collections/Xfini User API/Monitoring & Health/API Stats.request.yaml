@@ -1,0 +1,25 @@
+$kind: http-request
+description: Returns created vs. failed statistics for `/create-student` for
+  today and the last 7 days. Backed by local SQLite (`STATS_DB_PATH`).
+url: "{{baseUrl}}/stats"
+method: GET
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response contains today and last7Days counts", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.success).to.be.true;
+          pm.expect(jsonData.today).to.have.property("created");
+          pm.expect(jsonData.today).to.have.property("failed");
+          pm.expect(jsonData.last7Days).to.have.property("created");
+          pm.expect(jsonData.last7Days).to.have.property("failed");
+      });
+    language: text/javascript
+examples: ./.resources/API Stats.resources/examples
+order: 2000

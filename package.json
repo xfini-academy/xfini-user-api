@@ -9,6 +9,7 @@
     "dev": "nodemon index.js",
     "build": "node --check index.js && node --check firebaseAdmin.js",
     "test": "node --experimental-test-module-mocks --test",
+    "mock": "node postman/mocks/xfini-user-api/mock.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

@@ -1,0 +1,19 @@
+workspace:
+  id: 4c7acbce-7e15-4be9-9237-f3a3a43a03e4
+
+localResources:
+  collections:
+    - postman/collections/Xfini User API
+  environments:
+    - postman/environments/xfini_user_api.environment.yaml
+  specs:
+    - postman/specs/xfini_user_api.openapi.yaml
+    - postman/specs/xfini_user_api.openapi.json
+  documents:
+    - postman/documents/WORKSPACE-README.md
+  mocks:
+    - postman/mocks/xfini-user-api
+resourceNameMappings:
+  specs:
+    - ../postman/specs/xfini_user_api.openapi.json: xfini_user_api.openapi.json
+    - ../postman/specs/xfini_user_api.openapi.yaml: xfini_user_api.openapi.yaml

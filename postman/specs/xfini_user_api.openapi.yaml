@@ -1,0 +1,384 @@
+openapi: 3.0.3
+info:
+  title: Xfini User API
+  description: Standalone Express REST API for Xfini Academy student provisioning, subscription management, and expiry tracking, backed by Firebase Authentication and Cloud Firestore.
+  version: 1.1.0
+  contact:
+    name: Xfini Academy
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+  - url: http://localhost:5677
+    description: Docker Compose host mapped port
+  - url: https://unsavory-anteater-regally.ngrok-free.dev
+    description: Static ngrok public tunnel
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns server liveness status. Used by Docker health checks and monitoring.
+      operationId: getHealth
+      tags:
+        - Monitoring & Health
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /stats:
+    get:
+      summary: API statistics
+      description: Returns created vs. failed student creation counts for today and the last 7 days from local SQLite.
+      operationId: getStats
+      tags:
+        - Monitoring & Health
+      responses:
+        '200':
+          description: Usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '500':
+          description: SQLite read error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/getToken:
+    post:
+      summary: Get admin Firebase ID token
+      description: Signs in with ADMIN_EMAIL and ADMIN_PASSWORD configured in the server environment via Firebase Identity Toolkit and returns a fresh short-lived ID token (1 hour).
+      operationId: getToken
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTokenResponse'
+        '401':
+          description: Invalid administrator credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server configuration missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /create-student:
+    post:
+      summary: Create student user and subscription
+      description: Creates a Firebase Auth user, resolves subscription plan, queries active courses tagged [AT], creates Firestore student profile (users/{uid}) and active subscription record (subscriptions/{id}), and sets custom user claims.
+      operationId: createStudent
+      tags:
+        - Students & Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentRequest'
+      responses:
+        '200':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStudentResponse'
+        '400':
+          description: Validation error or plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Firestore read/write failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /expiring-students:
+    get:
+      summary: List subscriptions expiring tomorrow (or on target date)
+      description: Reads active subscriptions ending on tomorrow's calendar date in Asia/Kolkata (or target date from query). Deduplicates by student userId and excludes students who have an active subscription extended beyond the target date.
+      operationId: getExpiringStudents
+      tags:
+        - Students & Subscriptions
+      security:
+        - BearerAuth: []
+        - {}
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Target calendar date in YYYY-MM-DD format. Defaults to tomorrow's date in Asia/Kolkata.
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+            example: '2026-09-14'
+      responses:
+        '200':
+          description: Expiring students retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpiringStudentsResponse'
+        '400':
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (invalid token when auth header provided or when REQUIRE_AUTH=true)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Firestore lookup failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Firebase ID Token (obtained via POST /api/getToken)
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+      required:
+        - status
+
+    StatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        today:
+          type: object
+          properties:
+            created:
+              type: integer
+              example: 5
+            failed:
+              type: integer
+              example: 1
+          required:
+            - created
+            - failed
+        last7Days:
+          type: object
+          properties:
+            created:
+              type: integer
+              example: 34
+            failed:
+              type: integer
+              example: 3
+          required:
+            - created
+            - failed
+      required:
+        - success
+        - today
+        - last7Days
+
+    GetTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        idToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIs...
+        expiresIn:
+          type: string
+          example: '3600'
+      required:
+        - success
+        - idToken
+        - expiresIn
+
+    CreateStudentRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        role:
+          type: string
+          enum: [student, admin]
+          example: student
+        planmonths:
+          type: string
+          description: Must match the name of an active plan in Firestore subscriptionPlans collection
+          example: 16 DAYS PLAN
+      required:
+        - firstName
+        - lastName
+        - email
+        - role
+        - planmonths
+
+    CreateStudentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        userId:
+          type: string
+          example: 7dKpQzKfadX5CaY8lNzQW61Tu49
+        email:
+          type: string
+          example: jane.doe@example.com
+        displayName:
+          type: string
+          example: Jane Doe
+        password:
+          type: string
+          example: jane@123
+        role:
+          type: string
+          example: student
+        planName:
+          type: string
+          example: 16 DAYS PLAN
+        planId:
+          type: string
+          example: 5TSO8OTZY7zXUbNztCFU
+        subscriptionId:
+          type: string
+          example: sub_7dKpQzKfadX5CaY8lN
+        assignedCourses:
+          type: integer
+          example: 4
+        endDate:
+          type: string
+          format: date-time
+          example: '2026-09-28T10:00:00.000Z'
+      required:
+        - success
+        - userId
+        - email
+        - displayName
+        - password
+        - role
+        - planName
+        - planId
+        - subscriptionId
+        - assignedCourses
+        - endDate
+
+    ExpiringStudentsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        targetDate:
+          type: string
+          example: '2026-09-14'
+        count:
+          type: integer
+          example: 1
+        students:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudentExpiringItem'
+      required:
+        - success
+        - targetDate
+        - count
+        - students
+
+    StudentExpiringItem:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: B3UZ4qzr81SXjjqbx6wLJNGOKZ12
+        email:
+          type: string
+          example: student@example.com
+        displayName:
+          type: string
+          example: John Doe
+        planId:
+          type: string
+          example: k8eTfCxhBaA8fHDd4pT0
+        planName:
+          type: string
+          example: 1 MONTH PLAN
+        subscriptionId:
+          type: string
+          example: 03TnaVAlnmUShrA5bc7M
+        startDate:
+          type: string
+          format: date-time
+          example: '2026-08-13T04:07:00.076Z'
+        endDate:
+          type: string
+          format: date-time
+          example: '2026-09-14T04:07:00.076Z'
+        status:
+          type: string
+          example: active
+      required:
+        - userId
+        - email
+        - displayName
+        - planId
+        - planName
+        - subscriptionId
+        - startDate
+        - endDate
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: string
+          example: INVALID_INPUT
+        error:
+          type: string
+          example: All fields are required.
+      required:
+        - success
+        - error

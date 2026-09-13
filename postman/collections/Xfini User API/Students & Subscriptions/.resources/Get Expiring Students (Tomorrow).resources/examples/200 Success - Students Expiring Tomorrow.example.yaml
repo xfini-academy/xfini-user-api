@@ -1,0 +1,33 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/expiring-students"
+  method: GET
+  headers:
+    Accept: application/json
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "targetDate": "2026-09-13",
+        "count": 1,
+        "students": [
+          {
+            "userId": "B3UZ4qzr81SXjjqbx6wLJNGOKZ12",
+            "email": "student@example.com",
+            "displayName": "John Doe",
+            "planId": "k8eTfCxhBaA8fHDd4pT0",
+            "planName": "1 MONTH PLAN",
+            "subscriptionId": "03TnaVAlnmUShrA5bc7M",
+            "startDate": "2026-08-13T04:07:00.076Z",
+            "endDate": "2026-09-13T04:07:00.076Z",
+            "status": "active"
+          }
+        ]
+      }
+order: 1000

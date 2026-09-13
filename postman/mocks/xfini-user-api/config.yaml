@@ -1,0 +1,9 @@
+name: Xfini User API Mock
+port: 4010
+protocol: http
+version: 1
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true
+id: 01a0996d-1778-708b-aad8-5426c28c0fd7

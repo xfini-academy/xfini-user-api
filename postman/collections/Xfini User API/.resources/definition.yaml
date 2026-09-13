@@ -1,0 +1,17 @@
+$kind: collection
+name: Xfini User API
+description: Complete Postman API Collection for Xfini User API. A standalone Express REST API for student user creation, subscription management, and expiry tracking, backed by Firebase Auth and Cloud Firestore.
+variables:
+  - key: baseUrl
+    value: http://localhost:3001
+    secret: false
+  - key: idToken
+    value: ""
+    secret: false
+  - key: samplePlanMonths
+    value: 16 DAYS PLAN
+    secret: false
+  - key: supabase_service_role_api_key_0tqy
+    secret: true
+  - key: bearer_token_0s7j
+    secret: true

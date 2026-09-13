@@ -1,0 +1,3 @@
+$kind: folder
+description: Pre-configured templates and sandbox requests for testing new endpoints against Xfini User API.
+order: 4000

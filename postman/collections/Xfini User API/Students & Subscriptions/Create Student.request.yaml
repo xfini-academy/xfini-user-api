@@ -1,0 +1,45 @@
+$kind: http-request
+description: Creates a new student by provisioning a Firebase Auth user,
+  creating their Firestore student profile (`users/{uid}`), querying active
+  courses tagged `[AT]`, auto-resolving the plan from `subscriptionPlans`, and
+  creating an active subscription record (`subscriptions/{id}`). Auto-generates
+  password as `{lowercaseFirstName}@123`.
+url: "{{baseUrl}}/create-student"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: text
+  content: |-
+    {
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "email": "jane.doe@example.com",
+      "role": "student",
+      "planmonths": "{{samplePlanMonths}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test("Status code is 200 or 400", function () {
+          pm.expect([200, 400]).to.include(pm.response.code);
+      });
+
+
+      if (pm.response.code === 200) {
+          pm.test("Student created successfully", function () {
+              const jsonData = pm.response.json();
+              pm.expect(jsonData.success).to.be.true;
+              pm.expect(jsonData.userId).to.be.a("string");
+              pm.expect(jsonData.email).to.be.a("string");
+              pm.expect(jsonData.subscriptionId).to.be.a("string");
+              pm.expect(jsonData.endDate).to.be.a("string");
+              
+              pm.collectionVariables.set("lastCreatedUserId", jsonData.userId);
+              pm.collectionVariables.set("lastSubscriptionId", jsonData.subscriptionId);
+          });
+      }
+    language: text/javascript
+examples: ./.resources/Create Student.resources/examples
+order: 1000

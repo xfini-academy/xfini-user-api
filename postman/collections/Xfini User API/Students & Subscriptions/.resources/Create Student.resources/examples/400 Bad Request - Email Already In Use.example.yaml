@@ -1,0 +1,30 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/create-student"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "existing.student@example.com",
+        "role": "student",
+        "planmonths": "16 DAYS PLAN"
+      }
+response:
+  statusCode: 400
+  statusText: Bad Request
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": false,
+        "code": "auth/email-already-exists",
+        "error": "The email address is already in use by another account."
+      }
+order: 4000

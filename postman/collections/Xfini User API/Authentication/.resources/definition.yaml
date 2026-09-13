@@ -1,0 +1,3 @@
+$kind: collection
+description: Endpoints for obtaining Firebase authentication tokens for administrative and authorized operations.
+order: 1000

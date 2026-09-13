@@ -1,0 +1,32 @@
+$kind: http-request
+description: Signs in using ADMIN_EMAIL and ADMIN_PASSWORD configured in the
+  server environment via the Google Identity Toolkit REST API and returns a
+  short-lived Firebase ID token (valid for 1 hour). Automatically sets the
+  `idToken` collection variable upon success.
+url: "{{baseUrl}}/api/getToken"
+method: POST
+headers:
+  Accept: application/json
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+
+      pm.test("Response indicates success", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData.success).to.be.true;
+          pm.expect(jsonData.idToken).to.be.a("string");
+          pm.expect(jsonData.expiresIn).to.exist;
+          
+          // Store token in collection & environment variable for subsequent requests
+          pm.collectionVariables.set("idToken", jsonData.idToken);
+          if (pm.environment) {
+              pm.environment.set("idToken", jsonData.idToken);
+          }
+      });
+    language: text/javascript
+examples: ./.resources/Get Admin ID Token.resources/examples
+order: 1000

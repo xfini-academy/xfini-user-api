@@ -1,0 +1,3 @@
+$kind: collection
+description: System health check and request statistics endpoints.
+order: 3000

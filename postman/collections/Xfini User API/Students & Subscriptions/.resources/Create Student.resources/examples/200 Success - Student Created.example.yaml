@@ -1,0 +1,38 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/create-student"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: text
+    content: |-
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane.doe@example.com",
+        "role": "student",
+        "planmonths": "16 DAYS PLAN"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "userId": "7dKpQzKfadX5CaY8lNzQW61Tu49",
+        "email": "jane.doe@example.com",
+        "displayName": "Jane Doe",
+        "password": "jane@123",
+        "role": "student",
+        "planName": "16 DAYS PLAN",
+        "planId": "5TSO8OTZY7zXUbNztCFU",
+        "subscriptionId": "sub_7dKpQzKfadX5CaY8lN",
+        "assignedCourses": 4,
+        "endDate": "2026-09-28T10:00:00.000Z"
+      }
+order: 1000

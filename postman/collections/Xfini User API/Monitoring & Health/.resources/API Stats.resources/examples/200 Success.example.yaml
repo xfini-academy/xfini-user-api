@@ -1,0 +1,24 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/stats"
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "today": {
+          "created": 5,
+          "failed": 1
+        },
+        "last7Days": {
+          "created": 34,
+          "failed": 3
+        }
+      }
+order: 1000

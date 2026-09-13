@@ -1,0 +1,29 @@
+name: Xfini User API (Local Environment)
+values:
+  - key: baseUrl
+    value: http://localhost:3001
+    enabled: true
+  - key: ngrokBaseUrl
+    value: https://unsavory-anteater-regally.ngrok-free.dev
+    enabled: true
+  - key: adminEmail
+    value: rahulbushi69@gmail.com
+    enabled: true
+  - key: adminPassword
+    value: rahul@123
+    enabled: true
+    type: secret
+  - key: firebaseApiKey
+    value: yAIzaSyCxGroehAVetfOyNexCJglaY06ishxcrSE
+    enabled: true
+    type: secret
+  - key: ngrokDomain
+    value: unsavory-anteater-regally.ngrok-free.dev
+    enabled: true
+  - key: idToken
+    value: ""
+    enabled: true
+    type: secret
+  - key: samplePlanMonths
+    value: 16 DAYS PLAN
+    enabled: true

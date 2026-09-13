@@ -1,0 +1,44 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/expiring-students?date=2026-09-14"
+  method: GET
+  queryParams:
+    date: 2026-09-14
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body:
+    type: json
+    content: |-
+      {
+        "success": true,
+        "targetDate": "2026-09-14",
+        "count": 4,
+        "students": [
+          {
+            "userId": "YfJUNe0yhjMRVg232tVoDejh7Pq2",
+            "email": "student1@example.com",
+            "displayName": "Christy Diana",
+            "planId": "JaSv4BFhylB9w7I5k5Bf",
+            "planName": "2 MONTH PLAN",
+            "subscriptionId": "OrLK07Awf6R4cUs9Acgy",
+            "startDate": "2026-06-15T04:18:07.847Z",
+            "endDate": "2026-09-14T04:18:07.847Z",
+            "status": "active"
+          },
+          {
+            "userId": "1RN0ke5rMDf4oGUVh0hwnFSjkn02",
+            "email": "student2@example.com",
+            "displayName": "Sachini Chanika",
+            "planId": "JaSv4BFhylB9w7I5k5Bf",
+            "planName": "2 MONTH PLAN",
+            "subscriptionId": "OJNMx9kbM9pFI3InuxSe",
+            "startDate": "2026-06-15T08:56:44.972Z",
+            "endDate": "2026-09-14T08:56:44.972Z",
+            "status": "active"
+          }
+        ]
+      }
+order: 1000
