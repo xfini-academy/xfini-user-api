@@ -28,13 +28,22 @@ services:
     restart: unless-stopped
 
   n8n:
-    image: n8nio/n8n:latest
+    # Pin the image so a routine container recreation cannot unexpectedly pull a new major version.
+    # Set N8N_IMAGE in .env to the exact version you have validated in a test instance.
+    image: ${N8N_IMAGE:-n8nio/n8n:2.46.6}
     container_name: n8n
     ports:
       - '5678:5678'
     environment:
       GENERIC_TIMEZONE: Asia/Kolkata
       TZ: Asia/Kolkata
+      # Keep the previous 2.x task timeout and Compression node limits for compatibility.
+      N8N_RUNNERS_TASK_TIMEOUT: ${N8N_RUNNERS_TASK_TIMEOUT:-300}
+      N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES: ${N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES:-2147483648}
+      N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES: ${N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES:-5000}
+      # Preserves existing unverified community packages. Set to false after confirming
+      # every workflow uses verified packages, or keep true only for packages you trust.
+      N8N_UNVERIFIED_PACKAGES_ENABLED: ${N8N_UNVERIFIED_PACKAGES_ENABLED:-true}
     dns:
       - 1.1.1.1
       - 8.8.8.8
