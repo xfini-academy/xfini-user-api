@@ -28,9 +28,8 @@ services:
     restart: unless-stopped
 
   n8n:
-    # Pin the image so a routine container recreation cannot unexpectedly pull a new major version.
-    # Set N8N_IMAGE in .env to the exact version you have validated in a test instance.
-    image: ${N8N_IMAGE:-n8nio/n8n:2.46.6}
+    # Pulls the newest image whenever this service is updated or recreated.
+    image: n8nio/n8n:latest
     container_name: n8n
     ports:
       - '5678:5678'
